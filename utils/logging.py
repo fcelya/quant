@@ -16,7 +16,7 @@ from backtrader.analyzers import AnnualReturn
 
 class Logger01(Analyzer):
     
-    params = (('log_path', None),)
+    params = (('log_path', None),('data_df',None))
     def __init__(self):
         self.order_dict = dict()
         self.order_list = list()
@@ -24,14 +24,15 @@ class Logger01(Analyzer):
         self.trade_list = list()
         self.fund_dict = dict()
         self.fund_list = list()
-        if self.params.log_path == None:
+        self.data_df = self.params.data_df
+        if self.params.log_path is None:
             self.log_path = f'../backtests/automatically-set_{self.strategy.__name__}_{list(self.dnames.keys())[0]}_{datetime.now().isoformat()}'
+            print("[Warning] - No log path provided")
         else:
             self.log_path = self.params.log_path
         self.i=1
-        pass
         
-    
+        pass
 
     def start(self):
         pass
@@ -42,14 +43,18 @@ class Logger01(Analyzer):
     def stop(self):    
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
+        
         df = pd.DataFrame.from_dict(self.fund_list,orient="columns")
         df.to_csv(os.path.join(self.log_path,"funds.csv"))
+        summary_df = df[['date','value']]
         self.fund_list=list()
         print("[LOG] - Funds logged")
+        
         df = pd.DataFrame.from_dict(self.order_list,orient="columns")
         df.to_csv(os.path.join(self.log_path,"orders.csv"))
         self.order_list=list()
         print("[LOG] - Orders logged")
+        
         trades = list()
         for k1 in self.strategy._trades.keys():
             for k2 in self.strategy._trades[k1].keys():
@@ -62,7 +67,27 @@ class Logger01(Analyzer):
                         self.append_trade(trade)
         df = pd.DataFrame.from_dict(self.trade_list,orient="columns")
         df.to_csv(os.path.join(self.log_path,"trades.csv"))
+        trades = list()
+        self.trade_list = list()
         print("[LOG] - Trades logged")
+
+        if self.data_df is not None:
+            self.data_df = self.data_df[['date','open','high','low','close','volume']]
+            self.data_df.loc[:,'date'] = pd.to_datetime(pd.DatetimeIndex(self.data_df.loc[:,'date']).normalize())
+            self.data_df.set_index('date')
+            summary_df.loc[:,'date'] = pd.to_datetime(pd.DatetimeIndex(summary_df.loc[:,'date']).normalize())
+            summary_df.set_index('date')
+            summary_df = pd.concat([summary_df,self.data_df],join='outer',ignore_index=False,axis=1)
+            summary_df = summary_df[['open','high','low','close','volume','value','date']]
+            summary_df.fillna(0,inplace=True)
+            print(summary_df)
+            # summary_df = summary_df.reset_index(drop=True)
+        else:
+            print("[WARNING] - No data DataFrame provided. Summary log will have reduced data")
+        
+        summary_df['close_returns'] = summary_df['close'].pct_change()
+        summary_df['value_returns'] = summary_df['value'].pct_change()
+        summary_df.to_csv(os.path.join(self.log_path,"summary.csv"))
         pass
 
     def notify_cashvalue(self, cash, value):
