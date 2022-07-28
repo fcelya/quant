@@ -12,7 +12,7 @@ import backtrader as bt
 from utils.testers import TestStrategyComplete
 
 
-def run_backtest_full(strategy=TestStrategyComplete,datapath='/home/fcelaya/quant/data/us/daily/aapl.csv',analyzers=None,custom_log_prefix=None,init_cash=100000.0,commission=0.00,margin=None):
+def run_backtest_full(strategy=TestStrategyComplete,datapath='../data/us/daily/aapl.csv',analyzers=None,custom_log_prefix=None,init_cash=100000.0,commission=0.00,margin=None):
     # Create a cerebro entity
     cerebro = bt.Cerebro()
 
