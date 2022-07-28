@@ -1,0 +1,12 @@
+develop add sizer to cerebro in run_backtest_full
+organize utils
+develop data download module
+invent custom strategy metrics
+develop simplified logger
+develop simplified statistics
+create samples
+study backtrader library
+invent+test entry strategies
+intent+test exit strategies
+invent+develop+test wholistic portfolio management
+live trading module
