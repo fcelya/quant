@@ -1,0 +1,26 @@
+######## SETUP INSTRUCTIONS ########
+1. BASIC SETUP
+Download git cli
+git clone https://github.com/fcelya/quant
+
+2. VIRTUAL ENVIRONMENT
+cd quant
+Install python 3.7. Installation instructions vary
+Make venv inside quant (python3.7 -m venv venv)
+activate venv. Instructions vary
+pip install backtrader
+pip uninstall backtrader
+pip install quantstats
+pip uninstall quantstats (this is done to install all necessary dependencies but later uninstall it to use local versions)
+
+3. LOCAL LIBRARIES
+mkdir libraries cd libraries
+git clone https://github.com/fcelya/backtrader
+git clone https://github.com/fcelya/quantstats
+
+4. You are ready to play!
+
+A. To get latest version of local libraries or of base setup simply 
+git pull https://github.com/fcelya/quant from within /quant
+git pull https://github.com/fcelya/backtrader from within /quant/libraries/backtrader
+git pull https://github.com/fcelya/quantstats from within /quant/libraries/quantstats
