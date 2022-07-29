@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from datetime import datetime  # For datetime objects
 import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
+import requests
 
 import pandas as pd
 
@@ -14,6 +15,8 @@ import quantstats as qs
 
 sys.path.append("../")
 from utils.testers import TestStrategyComplete
+
+import yfinance as yf
 
 
 def run_backtest_full(
@@ -90,3 +93,39 @@ def get_report_complete(log_path, html=True, console=False):
         qs.reports.full(
             df.loc[:, "value_returns"], benchmark=df.loc[:, "close_returns"]
         )
+
+
+def get_stock_data(tickers, path, date_start=None, date_end=None, period=None):
+
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    if date_start is not None and date_end is not None:
+        for ticker in tickers:
+            data = yf.download(tickers=ticker, start=date_start, end=date_end)
+            data_path = os.path.join(path, ticker.upper() + ".csv")
+            data.columns = [c.lower() for c in data.columns]
+            data.to_csv(data_path, index_label="date")
+    elif period is not None:
+        for ticker in tickers:
+            data = yf.download(tickers=ticker, period=period)
+            data_path = os.path.join(path, ticker.upper() + ".csv")
+            data.columns = [c.lower() for c in data.columns]
+            data.to_csv(data_path, index_label="date")
+    else:
+        print("[WARNING] - Either start and end date or period must be specified")
+
+
+def save_download_file(path, url, name):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    req = requests.get(url)
+    url_content = req.content
+    file_path = os.path.join(path, name)
+    with open(file_path, "wb") as f:
+        f.write(url_content)
+        f.close()
+
+
+def get_files(path):
+    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
