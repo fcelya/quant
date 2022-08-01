@@ -95,20 +95,24 @@ def get_report_complete(log_path, html=True, console=False):
         )
 
 
-def get_stock_data(tickers, path, date_start=None, date_end=None, period=None):
+def get_stock_data(
+    tickers, path, date_start=None, date_end=None, period=None, interval="1d"
+):
 
     if not os.path.exists(path):
         os.makedirs(path)
 
     if date_start is not None and date_end is not None:
         for ticker in tickers:
-            data = yf.download(tickers=ticker, start=date_start, end=date_end)
+            data = yf.download(
+                tickers=ticker, start=date_start, end=date_end, interval=interval
+            )
             data_path = os.path.join(path, ticker.upper() + ".csv")
             data.columns = [c.lower() for c in data.columns]
             data.to_csv(data_path, index_label="date")
     elif period is not None:
         for ticker in tickers:
-            data = yf.download(tickers=ticker, period=period)
+            data = yf.download(tickers=ticker, period=period, interval=interval)
             data_path = os.path.join(path, ticker.upper() + ".csv")
             data.columns = [c.lower() for c in data.columns]
             data.to_csv(data_path, index_label="date")
