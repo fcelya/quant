@@ -96,7 +96,7 @@ def get_report_complete(log_path, html=True, console=False):
 
 
 def get_stock_data(
-    tickers, path, date_start=None, date_end=None, period=None, interval="1d"
+    tickers, path, date_start=None, date_end=None, period=None, in_conflict_keep="old"
 ):
 
     if not os.path.exists(path):
@@ -104,18 +104,38 @@ def get_stock_data(
 
     if date_start is not None and date_end is not None:
         for ticker in tickers:
-            data = yf.download(
-                tickers=ticker, start=date_start, end=date_end, interval=interval
-            )
+            data = yf.download(tickers=ticker, start=date_start, end=date_end)
             data_path = os.path.join(path, ticker.upper() + ".csv")
             data.columns = [c.lower() for c in data.columns]
-            data.to_csv(data_path, index_label="date")
+            if os.path.exists(data_path):
+                old_df = pd.read_csv(data_path, index_col=0)
+                old_df.index = pd.to_datetime(old_df.index)
+                if in_conflict_keep == "old":
+                    final = old_df.combine_first(data)
+                elif in_conflict_keep == "new":
+                    final = data.combine_first(old_df)
+                else:
+                    raise ValueError(
+                        'Parameter in_conflict_keep can only have two values: "old" or "new"'
+                    )
+            final.to_csv(data_path, index_label="date")
     elif period is not None:
         for ticker in tickers:
-            data = yf.download(tickers=ticker, period=period, interval=interval)
+            data = yf.download(tickers=ticker, period=period)
             data_path = os.path.join(path, ticker.upper() + ".csv")
             data.columns = [c.lower() for c in data.columns]
-            data.to_csv(data_path, index_label="date")
+            if os.path.exists(data_path):
+                old_df = pd.read_csv(data_path, index_col=0)
+                old_df.index = pd.to_datetime(old_df.index)
+                if in_conflict_keep == "old":
+                    final = old_df.combine_first(data)
+                elif in_conflict_keep == "new":
+                    final = data.combine_first(old_df)
+                else:
+                    raise ValueError(
+                        'Parameter in_conflict_keep can only have two values: "old" or "new"'
+                    )
+            final.to_csv(data_path, index_label="date")
     else:
         print("[WARNING] - Either start and end date or period must be specified")
 
