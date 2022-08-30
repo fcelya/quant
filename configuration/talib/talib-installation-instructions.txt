@@ -2,12 +2,16 @@
 # https://appdividend.com/2022/03/19/how-to-solve-python-h-no-such-file-or-directory/
 $ sudo apt install libpython3.7-dev
 
-### Install TaLib 
+### Install TaLib
 # http://mrjbq7.github.io/ta-lib/install.html
-$ untar and cd
+Ir a configuration/talib
+$ tar xvf ta-lib-0.4.0-src.tar.gz
+$ cd ta-lib
 $ ./configure --prefix=/usr
 $ make
 $ sudo make install
 
-### Install TaLib wrapper
+
+### Install TaLib wrapper de Python con venv activado
 # http://mrjbq7.github.io/ta-lib/install.html
+$ pip install TA-Lib
