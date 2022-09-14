@@ -1,7 +1,8 @@
-## LIBRARIES
-from statsmodels.tsa.vector_ar.vecm import coint_johansen
+## LIBRARIES 
+from statsmodels.tsa.vector_ar.vecm import coint_johansen # hay que instalarla con pip install statsmodels
 
 
+## Johansen Test
 def johansen_test(y, p):
         """
         Get the cointegration vectors at 95% level of significance
