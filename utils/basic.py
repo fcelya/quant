@@ -21,7 +21,7 @@ import yfinance as yf
 
 def run_backtest_full(
     strategy=TestStrategyComplete,
-    datapath="../data/us/daily/aapl.csv",
+    datapath="../data/",
     analyzers=None,
     custom_log_prefix=None,
     init_cash=100000.0,
