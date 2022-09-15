@@ -137,6 +137,8 @@ def get_stock_data(
                     raise ValueError(
                         'Parameter in_conflict_keep can only have two values: "old" or "new"'
                     )
+            else:
+                final = data
             final.to_csv(data_path, index_label="date")
     else:
         print("[WARNING] - Either start and end date or period must be specified")
