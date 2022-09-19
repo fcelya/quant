@@ -99,6 +99,18 @@ def get_stock_data(
     tickers, path, date_start=None, date_end=None, period=None, in_conflict_keep="old"
 ):
 
+'''
+tickers: lista de tickers que se desean extraer
+path: directorio donde se desea guardar el cvs con los datos. default = /data
+date_start: fecha de comienzo del periodo. default = earliest
+date_end: fecha final del periodo. default = latest
+periodo = ME LA CARGO
+granularidad: resolucion de los datos. default = daily
+
+Asumimos que los datos no están guardados previamente, y en caso de estarlo, se sobreecrbirán.
+
+'''
+
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -121,6 +133,7 @@ def get_stock_data(
             else:
                 final = data
             final.to_csv(data_path, index_label="date")
+            
     elif period is not None:
         for ticker in tickers:
             data = yf.download(tickers=ticker, period=period)
