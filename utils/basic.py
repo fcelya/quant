@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from datetime import datetime  # For datetime objects
+from datetime import datetime, date  # For datetime objects
 import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
 import requests
@@ -96,65 +96,32 @@ def get_report_complete(log_path, html=True, console=False):
 
 
 def get_stock_data(
-    tickers, path, date_start=None, date_end=None, period=None, in_conflict_keep="old"
+    tickers, path = '../data', date_start=None, date_end=None, period = 'max', interval = '1d'
 ):
+    '''
+    tickers: lista de tickers que se desean extraer
+    path: directorio donde se desea guardar el cvs con los datos. default = /data
+    date_start: fecha de comienzo del periodo. default = None
+    date_end: fecha final del periodo. default = None
+    periodo: default = 'max'
+    interval: resolucion de los datos. default = '1d'
 
-'''
-tickers: lista de tickers que se desean extraer
-path: directorio donde se desea guardar el cvs con los datos. default = /data
-date_start: fecha de comienzo del periodo. default = earliest
-date_end: fecha final del periodo. default = latest
-periodo = ME LA CARGO
-granularidad: resolucion de los datos. default = daily
+    Asumimos que los datos no están guardados previamente, y en caso de estarlo, se sobreecribirán.
 
-Asumimos que los datos no están guardados previamente, y en caso de estarlo, se sobreecrbirán.
-
-'''
+    '''
 
     if not os.path.exists(path):
         os.makedirs(path)
 
-    if date_start is not None and date_end is not None:
-        for ticker in tickers:
-            data = yf.download(tickers=ticker, start=date_start, end=date_end)
-            data_path = os.path.join(path, ticker.upper() + ".csv")
-            data.columns = [c.lower() for c in data.columns]
-            if os.path.exists(data_path):
-                old_df = pd.read_csv(data_path, index_col=0)
-                old_df.index = pd.to_datetime(old_df.index)
-                if in_conflict_keep == "old":
-                    final = old_df.combine_first(data)
-                elif in_conflict_keep == "new":
-                    final = data.combine_first(old_df)
-                else:
-                    raise ValueError(
-                        'Parameter in_conflict_keep can only have two values: "old" or "new"'
-                    )
-            else:
-                final = data
-            final.to_csv(data_path, index_label="date")
-            
-    elif period is not None:
-        for ticker in tickers:
-            data = yf.download(tickers=ticker, period=period)
-            data_path = os.path.join(path, ticker.upper() + ".csv")
-            data.columns = [c.lower() for c in data.columns]
-            if os.path.exists(data_path):
-                old_df = pd.read_csv(data_path, index_col=0)
-                old_df.index = pd.to_datetime(old_df.index)
-                if in_conflict_keep == "old":
-                    final = old_df.combine_first(data)
-                elif in_conflict_keep == "new":
-                    final = data.combine_first(old_df)
-                else:
-                    raise ValueError(
-                        'Parameter in_conflict_keep can only have two values: "old" or "new"'
-                    )
-            else:
-                final = data
-            final.to_csv(data_path, index_label="date")
-    else:
-        print("[WARNING] - Either start and end date or period must be specified")
+    for ticker in tickers:
+
+        data = yf.download(tickers=ticker, start=date_start, end=date_end, period = period, interval=interval)
+        data_path = os.path.join(path, ticker.upper() + ".csv")
+        data.columns = [c.lower() for c in data.columns]
+
+        data.to_csv(data_path, index_label="date")
+
+    
 
 
 def save_download_file(path, url, name):
