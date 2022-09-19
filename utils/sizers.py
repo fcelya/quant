@@ -45,3 +45,11 @@ class FixedRerverser(FixedSize):
         position = self.broker.getposition(data)
         size = self.p.stake * (1 + (position.size != 0))
         return size
+
+
+class PairTrading(bt.Sizer):
+    params = (('ponderacion', 0.5),)
+
+
+
+    return 

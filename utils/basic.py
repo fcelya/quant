@@ -78,6 +78,71 @@ def run_backtest_full(
     return log_path
 
 
+## back_test para pair trading
+# vamos a cargar 3 csv: dos para cada una de las acciones
+# y un tercer csv con el portfolio calculado por el Johansen test
+def run_backtest_full_pair(
+    strategy=TestStrategyComplete,
+    datapath="../data/us/daily/aapl.csv",
+    analyzers=None,
+    custom_log_prefix=None,
+    init_cash=100000.0,
+    commission=0.00,
+    margin=None,
+):
+    # Create a cerebro entity
+    cerebro = bt.Cerebro()
+
+    # Add a strategy
+    cerebro.addstrategy(strategy)
+
+    datalist = [
+    ('ARCHIVO.csv', 'NOMBRE'),
+    ('ARCHIVO.csv', 'NOMBRE'),
+    ('ARCHIVO.csv', 'NOMBRE'),
+    ]
+
+    for i in range(len(datalist)):
+        datapath = datapath + str(datalist[i][0])
+        df = pd.read_csv(datapath)
+        df["date"] = pd.to_datetime(df["date"])
+        data = bt.feeds.PandasData(dataname=df, datetime=0, open=1, high=2, low=3, close=4, volume=5)
+        cerebro.adddata(data, name=datalist[i][1])
+        cerebro.resampledata(data, name=datapath.replace("/", "-").replace("\\", "-"))
+
+    if custom_log_prefix is not None:
+        # chr(92) is the backslash
+        log_path = f'../backtests/{custom_log_prefix}_{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
+    else:
+        log_path = f'../backtests/{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
+
+    if analyzers is not None:
+        for analyzer in analyzers:
+            if "LOGGER" in analyzer.__name__.upper():
+                cerebro.addanalyzer(analyzer, log_path=log_path, data_df=df)
+            else:
+                cerebro.addanalyzer(analyzer)
+
+    # Set our desired cash start
+    cerebro.broker.setcash(init_cash)
+    cerebro.broker.setcommission(commission=commission, margin=margin)
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+    writer_path = os.path.join(log_path, "writer.csv")
+    cerebro.addwriter(bt.WriterFile, csv=True, out=writer_path)
+
+    # Print out the starting conditions
+    print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
+
+    # Run over everything
+    cerebro.run(exactbars=1)
+
+    # Print out the final result
+    print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+
+    return log_path
+
+
 def get_report_complete(log_path, html=True, console=False):
     summary_path = os.path.join(log_path, "summary.csv")
     df = pd.read_csv(summary_path, index_col=0)
