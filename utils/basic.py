@@ -116,8 +116,10 @@ def get_stock_data(
     for ticker in tickers:
 
         data = yf.download(tickers=ticker, start=date_start, end=date_end, period = period, interval=interval)
-        data_path = os.path.join(path, ticker.upper() + ".csv")
         data.columns = [c.lower() for c in data.columns]
+        start_date = data.index.min().date()
+        end_date = data.index.max().date()
+        data_path = os.path.join(path, ticker.upper() + "_"+ str(start_date) + "_" + str(end_date) + "_" + interval + ".csv")
 
         data.to_csv(data_path, index_label="date")
 
