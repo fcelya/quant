@@ -155,25 +155,51 @@ def get_files(path):
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
 
 
-def get_cryto_data(
-    id, vs_currency, days= 'max', interval= None,
+def get_crypto_data(
+    id, vs_currency, days= 'max', path= '../data', interval= None
 ):
-    url = f"https://api.coingecko.com/api/v3/coins/{id}/market_chart"
 
-    resp = requests.get(url=url, vs_currency, days, interval)
-
-    resp = requests.get(url=url,params=params)
-    data = resp.json() # Check the JSON Response Content documentation below
-    d2df = {}
-    d2df["date"] = [duple[0] for duple in data["prices"]]
-    for key in data.keys():
-        d2df[key] = [duple[1] for duple in data[key]]
-    df = pd.DataFrame(d2df)
-    df["date"] = pd.to_datetime(df["date"],unit="ms")
-    df.index = df["date"]
-    df = df.drop("date",axis=1)
-    df.index = pd.to_datetime(df.index)
-
+    """
+    id: lista con los ids de las cyptos
+    vs_currency: currency con 
     
+    """
+
+    for id in id:
+        
+        url = f"https://api.coingecko.com/api/v3/coins/{id}/market_chart"
+
+        if interval:
+
+            params = {
+                "vs_currency":vs_currency,
+                "days":days,
+                "interval":interval
+            }
+        else:
+            params = {
+                "vs_currency":vs_currency,
+                "days":days
+            }
+
+        resp = requests.get(url=url,params=params)
+        data = resp.json() # Check the JSON Response Content documentation below
+        d2df = {}
+        d2df["date"] = [duple[0] for duple in data["prices"]]
+        for key in data.keys():
+            d2df[key] = [duple[1] for duple in data[key]]
+        df = pd.DataFrame(d2df)
+        df["date"] = pd.to_datetime(df["date"],unit="ms")
+        df.index = df["date"]
+        df = df.drop("date",axis=1)
+        df.index = pd.to_datetime(df.index)
+
+        df.columns = [c.lower() for c in df.columns]
+        start_date = df.index.min().date()
+        end_date = df.index.max().date()
+        data_path = os.path.join(path, id.upper() +  "_" + 'vs' +  "_" + vs_currency + '_' + str(start_date) + "_" + str(end_date) + ".csv")
+        df.to_csv(data_path, index_label="date")
+
+        
 
 
