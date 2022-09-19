@@ -153,3 +153,27 @@ def save_download_file(path, url, name):
 
 def get_files(path):
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+
+
+def get_cryto_data(
+    id, vs_currency, days= 'max', interval= None,
+):
+    url = f"https://api.coingecko.com/api/v3/coins/{id}/market_chart"
+
+    resp = requests.get(url=url, vs_currency, days, interval)
+
+    resp = requests.get(url=url,params=params)
+    data = resp.json() # Check the JSON Response Content documentation below
+    d2df = {}
+    d2df["date"] = [duple[0] for duple in data["prices"]]
+    for key in data.keys():
+        d2df[key] = [duple[1] for duple in data[key]]
+    df = pd.DataFrame(d2df)
+    df["date"] = pd.to_datetime(df["date"],unit="ms")
+    df.index = df["date"]
+    df = df.drop("date",axis=1)
+    df.index = pd.to_datetime(df.index)
+
+    
+
+
