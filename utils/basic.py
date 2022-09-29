@@ -26,8 +26,19 @@ def run_backtest_full(
     custom_log_prefix=None,
     init_cash=100000.0,
     commission=0.00,
-    margin=None,
+    mult=1.0,
 ):
+    """
+    Runs a backtest on an asset
+    INPUT
+    strategy: [Optional, default = TestStrategyComplete] the strategy to test
+    datapath: [Optional, defalut = "../data/us/daily/aapl.csv"] path of the csv where the backtest data is. Must contain datetime, open, high, low, close, volume
+    analyzers: [Optional, default = None] The backtest analyzer, usually where the logger that records the results is chosen
+    custom_log_prefix: [Optional, default = None] a prefix for the folder where the logger will save the results
+    init_cash: [Optional, default = 100000.0] the initial money the trategy starts with
+    comission: [Optional, default = 0.00] the comission. It will be a percentage of the operation value if margin == None, and a set value if margin != None (margin is a parameter used when backtesting futures-like contracts)
+    mult: [Optional, default = 1.0] the multiplier applied to value of stocks, simulates leverage.
+    """
     # Create a cerebro entity
     cerebro = bt.Cerebro()
 
@@ -60,7 +71,7 @@ def run_backtest_full(
 
     # Set our desired cash start
     cerebro.broker.setcash(init_cash)
-    cerebro.broker.setcommission(commission=commission, margin=margin)
+    cerebro.broker.setcommission(commission=commission, mult=mult)
     if not os.path.exists(log_path):
         os.makedirs(log_path)
     writer_path = os.path.join(log_path, "writer.csv")
@@ -79,6 +90,13 @@ def run_backtest_full(
 
 
 def get_report_complete(log_path, html=True, console=False):
+    """
+    Creates a quantstats report
+    INPUTS
+    log_path: [Obligatory] Folder path where the summary.csv is stored
+    html: [Optional, default = True] whether to create an .html report and store it in the log_path folder
+    console: [Optional, default = False] whether to output the report directly
+    """
     summary_path = os.path.join(log_path, "summary.csv")
     df = pd.read_csv(summary_path, index_col=0)
     df = df.fillna(0).set_index(pd.to_datetime(df["date"])).drop("date", axis=1)
@@ -98,6 +116,16 @@ def get_report_complete(log_path, html=True, console=False):
 def get_stock_data(
     tickers, path, date_start=None, date_end=None, period=None, in_conflict_keep="old"
 ):
+    """
+    Save a .csv with a stock ohlcv values
+    INPUTS
+    tickers: [Obligatory] arrray of tickers for which you want the csv downloaded
+    path: [Obligatory] folder path where the csvs should be saved, existing or not
+    date_start: [Optional, default = None] first data date as 'YYYY-MM-DD'. If None the maximum will be chosen
+    date_end: [Optional, default = None] last data date as 'YYYY-MM-DD'. If None the maximum will be chosen
+    period: [Optional, default = None] dates range, alternative to date_start and date_end. valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max. Alternative to data
+    in_conflict_keep: [Optional, default = "old"] "old" or "new". If data already exists por a same date point, whether to keep the old or new data, as the file will be overwritten
+    """
 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -141,6 +169,13 @@ def get_stock_data(
 
 
 def save_download_file(path, url, name):
+    """
+    Downloads the file in a given URL and saves it
+    INPUTS
+    path: [Obligatory] the path where the file is to be saved
+    url: [Obligatory] the URL where the file is located
+    name: [Obligatory] name to be given to the file
+    """
     if not os.path.exists(path):
         os.makedirs(path)
     req = requests.get(url)
@@ -152,4 +187,9 @@ def save_download_file(path, url, name):
 
 
 def get_files(path):
+    """
+    Returns the path to all the files in a given folder
+    INPUTS
+    path: [Obligatory] the folder path to inspect
+    """
     return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
