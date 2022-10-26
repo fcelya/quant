@@ -12,13 +12,15 @@ class PairTrading(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        ''' Logging function fot this strategy'''
-        dt = dt or self.datas[0].datetime.date(0)
+        ''' Logging function for this strategy'''
+        dt = dt or self.stock[0].datetime.date(0)
         #print('%s, %s' % (dt.isoformat(), txt))
     
     def __init__(self) -> None:
         # Keep a reference to the "close" line in the data[0] dataseries
-        self.dataclose = self.datas[0].close
+        self.stock1close = self.stock1[0].close
+        self.stock2close = self.stock2[0].close
+        self.cointclose = self.coint[0].close
 
         # To keep track of pending orders and buy price/commission
         self.order = None
@@ -29,8 +31,8 @@ class PairTrading(bt.Strategy):
         #self.log_strategy = re.search("^(.*)\.py$",os.path.basename(__file__)).group(1)
         #self.log_data = list(self.dnames.keys())[0]
 
-        # Add a MovingAverageSimple indicator
-        self.boll = bt.talib.BBANDS(self.dataSEÑAL, timeperiod=self.params.timeperiod, nbdevup=self.params.nbdevup, nbdevdn=self.params.nbdevdn, matype=self.params.matype)
+        # Add a Bollinger-Bands indicator to the Cointegration Feed
+        self.upper, self.middle, self.lower = bt.talib.BBANDS(self.coint, timeperiod=self.params.timeperiod, nbdevup=self.params.nbdevup, nbdevdn=self.params.nbdevdn, matype=self.params.matype)
 
 
     def next(self):
@@ -45,14 +47,14 @@ class PairTrading(bt.Strategy):
         if not self.position:
 
             # Not yet ... we MIGHT BUY if ...
-            if self.dataclose[0] > self.sma[0]:
+            if self.cointclose[0] > self.boll[0]:
 
                 # BUY, BUY, BUY!!! (with all possible default parameters)
                 self.log('BUY CREATE, %.2f' % self.dataclose[0])
 
                 # Keep track of the created order to avoid a 2nd order
-                self.order = self.buy(data=1, SIZE_1)
-                self.order = self.buy(data=2, SIZE_2)
+                self.order = self.buy(data=stock1, )
+                self.order = self.buy(data=stock2, )
 
         else:
 

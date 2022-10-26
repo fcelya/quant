@@ -15,6 +15,7 @@ import quantstats as qs
 
 sys.path.append("../")
 from utils.testers import TestStrategyComplete
+from strategies import PairTrading
 
 import yfinance as yf
 
@@ -82,8 +83,8 @@ def run_backtest_full(
 # vamos a cargar 3 csv: dos para cada una de las acciones
 # y un tercer csv con el portfolio calculado por el Johansen test
 def run_backtest_full_pair(
-    strategy=TestStrategyComplete,
-    datapath="../data/us/daily/aapl.csv",
+    strategy=PairTrading,
+    datapath="../data/european/daily",
     analyzers=None,
     custom_log_prefix=None,
     init_cash=100000.0,
@@ -97,14 +98,15 @@ def run_backtest_full_pair(
     cerebro.addstrategy(strategy)
 
     datalist = [
-    ('ARCHIVO.csv', 'NOMBRE'),
-    ('ARCHIVO.csv', 'NOMBRE'),
-    ('ARCHIVO.csv', 'NOMBRE'),
+    ('abn.csv', 'stock1'),
+    ('aex.csv', 'stock2'),
+    ('coint.csv', 'coint'),
     ]
 
+    # Con el siguiente bucle añado 1 a 1 los csv como datafeeds, para ello primero hay que leerlos como pandas df
     for i in range(len(datalist)):
-        datapath = datapath + str(datalist[i][0])
-        df = pd.read_csv(datapath)
+        datapath_local = datapath + str(datalist[i][0])
+        df = pd.read_csv(datapath_local)
         df["date"] = pd.to_datetime(df["date"])
         data = bt.feeds.PandasData(dataname=df, datetime=0, open=1, high=2, low=3, close=4, volume=5)
         cerebro.adddata(data, name=datalist[i][1])
