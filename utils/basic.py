@@ -26,6 +26,8 @@ def run_backtest_full(
     custom_log_prefix=None,
     init_cash=100000.0,
     commission=0.00,
+    margin=None,
+    writer=False,
     mult=1.0,
 ):
     """
@@ -74,8 +76,9 @@ def run_backtest_full(
     cerebro.broker.setcommission(commission=commission, mult=mult)
     if not os.path.exists(log_path):
         os.makedirs(log_path)
-    writer_path = os.path.join(log_path, "writer.csv")
-    cerebro.addwriter(bt.WriterFile, csv=True, out=writer_path)
+    if writer:
+        writer_path = os.path.join(log_path, "writer.csv")
+        cerebro.addwriter(bt.WriterFile, csv=True, out=writer_path)
 
     # Print out the starting conditions
     print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
@@ -91,11 +94,12 @@ def run_backtest_full(
 
 def get_report_complete(log_path, html=True, console=False):
     """
-    Creates a quantstats report
+    Creates the quantstats report of a backtrader backtrade
     INPUTS
-    log_path: [Obligatory] Folder path where the summary.csv is stored
-    html: [Optional, default = True] whether to create an .html report and store it in the log_path folder
-    console: [Optional, default = False] whether to output the report directly
+    log_path: [Obligatory] the path to the folder where the summary.csv is contained
+    html: [Optional, default = True] Whether to create and store in the log_path a .html report
+    console: [Optional, default = False] Whether to show the report as output
+
     """
     summary_path = os.path.join(log_path, "summary.csv")
     df = pd.read_csv(summary_path, index_col=0)
