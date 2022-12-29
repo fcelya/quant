@@ -1,0 +1,1 @@
+Folder to locate your dirty notebooks that would mean absolutely nothing to everyone else. Changes in this folder will not be shared with everyone else.
