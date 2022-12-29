@@ -29,6 +29,7 @@ def run_backtest_full(
     margin=None,
     writer=False,
     mult=1.0,
+    log_path=None,
 ):
     """
     Runs a backtest on an asset
@@ -58,11 +59,16 @@ def run_backtest_full(
     cerebro.adddata(data)
     cerebro.resampledata(data, name=datapath.replace("/", "-").replace("\\", "-"))
 
+    if log_path is not None:
+        start_path = log_path
+    else:
+        start_path = "../backtests/"
     if custom_log_prefix is not None:
         # chr(92) is the backslash
-        log_path = f'../backtests/{custom_log_prefix}_{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
+        # log_path = f'../backtests/{custom_log_prefix}_{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
+        log_path = f'{start_path}{custom_log_prefix}_{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
     else:
-        log_path = f'../backtests/{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
+        log_path = f'{start_path}{strategy.__name__}_{datapath.replace("/","-").replace(chr(92),"-")}_{datetime.now().isoformat()}'
 
     if analyzers is not None:
         for analyzer in analyzers:
